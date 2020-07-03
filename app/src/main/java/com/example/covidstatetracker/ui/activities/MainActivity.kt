@@ -7,18 +7,25 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.covidstatetracker.R
+import com.example.covidstatetracker.models.CoVidStateItem
 import com.example.covidstatetracker.network.ApiClient
 import com.example.covidstatetracker.ui.MainRepository
 import com.example.covidstatetracker.ui.MainViewModel
 import com.example.covidstatetracker.ui.MainViewModelFactory
 import com.example.covidstatetracker.ui.adapters.StateAdapter
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var viewModel: MainViewModel
     lateinit var factory: MainViewModelFactory
     lateinit var adapter: StateAdapter
+    lateinit var listo : List<CoVidStateItem>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,14 +37,25 @@ class MainActivity : AppCompatActivity() {
 
         recycler_view_state.layoutManager = LinearLayoutManager(this)
 
-        viewModel.getData().observe(this,Observer { list ->
-            Log.i("aaa",list.toString())
-            adapter = StateAdapter(list)
+        coR()
 
-            recycler_view_state.adapter = adapter
+    }
 
-        })
+    fun coR() {
+        CoroutineScope(Main).launch{
+            viewModel.getData().observe(this@MainActivity,Observer { list ->
+                Log.i("aaa",list.toString())
+                listo = list
+                adapter = StateAdapter(list)
 
+                recycler_view_state.adapter = adapter
 
+            })
+//            withContext(Main){
+//                adapter = StateAdapter(listo)
+//
+//                recycler_view_state.adapter = adapter
+//            }
+        }
     }
 }
